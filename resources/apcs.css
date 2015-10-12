@@ -1,0 +1,87 @@
+body {
+    overflow: hidden;
+    background-color:rgb(30,40,50);
+    color:rgb(230,230,235);
+}
+
+a {
+  text-decoration:none;
+  color:rgb(220,220,220);
+}
+#editor {
+    margin: 0;
+    position: fixed;
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index:10;
+    transition:left .6s;
+    display:none;
+}
+
+#cancan {
+  display:block;
+  position:absolute;
+  top:50px;
+  left:0px;
+}
+
+#header{
+  position:absolute;
+  left:0px;
+  top:0px;
+  height:50px;
+  width:100%;
+  background-color:rgb(10,20,30);
+  border-bottom:1px solid rgb(50,60,70);
+}
+
+.headopts{
+  position:relative;
+  top:10px;
+  margin-top:0px;
+  padding:14px;
+  padding-left:7px;
+  padding-right:7px;
+  height:100%;
+  width:50px;
+  font-size:1.5em;
+  display:inline;
+  margin-right:50px;
+  cursor:pointer;
+}
+.headopts:hover{
+  background-color:rgb(17,27,37);
+}
+
+#rsmenu{
+  background-color:rgb(15,25,35);
+  position:absolute;
+  left:0px;
+  top:50px;
+  width:175px;
+  height:100%;
+  border-right:1px solid rgb(50,60,70);
+  overflow:hidden;
+  z-index:5;
+  transition: height .5s;
+}
+#rsmenu a{
+  padding:1px;
+  margin-bottom:4px;
+  margin-top:4px;
+  position:relative;
+  width:175px;
+  left:0px;
+  display:block;
+}
+#rsmenu a:hover{
+  background-color:rgb(100,100,110);
+}
+.menusec{
+  padding:5px;
+  margin-bottom:5px;
+  background-color:rgb(25,25,35);
+  border-bottom:1px solid rgb(30,30,30);
+}

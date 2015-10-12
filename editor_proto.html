@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Gamatra.de</title>
+
+  <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ REQUIRED STUFF-->
+  <script src="/scripts/jquery-2.1.4.min.js"></script>
+  <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ REQUIRED STUFF-->
+
+
+  <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Universal stuff-->
+  <script type="text/javascript">
+    SCRWIDTH=window.innerWidth;
+    SCRHEIGHT=window.innerHeight;
+    TOPHEIGHT=50;
+    ALGORITHMS={};
+    function saveCurr(){
+      $.ajax({method:"POST",
+              url:"/save__",
+              data:{solution:workspace,
+                    algorithms:ALGORITHMS
+                  },
+              success: function(){
+                resourcepopulate();
+              }});
+    }
+    function rename(){
+      if(!SELTYPE){
+        var i=prompt("Enter a new name for this workspace:");
+        if(i){
+          workspace.name=i;
+          updateCan();
+        }
+      } else if(SELTYPE="algorithm"){
+        var i= prompt("Enter a new name for the current file:");
+        if(i){
+          ALGORITHMS[i]=ALGORITHMS[SELECTED]
+          ALGORITHMS[i].name=i;
+          delete(ALGORITHMS[SELECTED]);
+          workspace.algorithms[i]=workspace.algorithms[SELECTED];
+          workspace.algorithms[SELECTED].name=i;
+          delete(workspace.algorithms[SELECTED]);
+          updateCan();
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" type="text/CSS" href="/resources/apcs.css"/>
+
+  <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Universal stuff-->
+
+
+</head>
+<body>
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Header bar here-->
+<div id="header">
+  <div class="headopts"><img src="fsdgfa"/>
+  </div>
+  <div class="headopts" onclick="resourceExpand();">Resources
+  </div>
+  <div class="headopts" onclick="saveCurr();">Save
+  </div>
+  <div class="headopts" onclick="resourceExpand();">Simulate
+  </div>
+  <div class="headopts" onclick="resourceExpand();">Run
+  </div>
+  <div class="headopts" onclick="resourceExpand();">Publish
+  </div>
+  <div class="headopts" onclick="closeEditor();">Close
+  </div>
+  <div class="headopts" onclick="rename();">Rename
+  </div>
+</div>
+
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Header bar here-->
+
+
+
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Resources menu here-->
+<div id="rsmenu">
+  <div class="menusec" id="menusolns"></div>
+  <div class="menusec" id="menualgs"></div>
+  <div class="menusec" id="menuress"></div>
+</div>
+
+<script type="text/javascript">
+  function resourcepopulate(){
+    $.ajax({
+    method: "GET",
+    url: "/get_names",
+    data: {},
+    success: function(ret){
+      console.log(ret);
+      var sec=document.getElementById("menusolns");
+      sec.innerHTML="<b>SOLUTIONS</b><br/>";
+      for (var i=0;i<ret.solutions.length;i++){
+        var sol=ret.solutions[i];
+        sec.innerHTML+="<a href='javascript:makenode("+'"solution","'
+                +sol+'"'+");'>"+sol+"</a>";
+      }
+      sec=document.getElementById("menualgs");
+      sec.innerHTML="<b><a href='javascript:makenode("+
+        '"algorithm",(Object.keys(workspace.algorithms).length+1)+".jl"'+");'>ALGORITHMS</a></b>";
+      for (var i=0;i<ret.algorithms.length;i++){
+        var alg=ret.algorithms[i];
+        sec.innerHTML+="<a href='javascript:makenode("+'"algorithm","'
+                +alg+'"'+");'>"+alg+"</a>";
+      }
+      sec=document.getElementById("menuress");
+      sec.innerHTML="<b>RESOURCES</b><br/>";
+      for (var i=0;i<ret.resources.length;i++){
+        var res=ret.resources[i];
+        sec.innerHTML+="<a href='javascript:makenode("+'"resource","'
+                +res+'"'+");'>"+res+"</a>";
+      }
+    }
+    });
+  }
+
+  resourcepopulate();
+  function resourceExpand(){
+
+    var rssting=document.getElementById("rsmenu");
+    if(rssting.style.height!="0px"){
+      rssting.style.height="0px";
+    } else{
+      rssting.style.height="100%";
+    }
+    if(document.getElementById("rsmenu").style.height=="100%"){
+      document.getElementById("editor").style.left="175px";
+    } else{
+      document.getElementById("editor").style.left="0px";
+    }
+  }
+</script>
+
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Resources menu here-->
+
+
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Code editor here-->
+<pre id="editor">
+
+</pre>
+<script src="/scripts/acemin/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/twilight");
+    editor.session.setMode("ace/mode/javascript");
+    function openEditor(){
+      if(document.getElementById("rsmenu").style.height=="0px"){
+        document.getElementById("editor").style.left="0px";
+      } else{
+        document.getElementById("editor").style.left="175px";
+      }
+      document.getElementById("editor").style.display="inline";
+    }
+    function closeEditor(){
+      document.getElementById("editor").style.display="none";
+      ALGORITHMS[SELECTED].code=editor.getValue();
+    }
+    function openAlg(algname){
+      openEditor();
+      editor.setValue(ALGORITHMS[algname].code);
+    }
+</script>
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Code editor here-->
+
+
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Canvas workspace here-->
+<canvas id="cancan"  onmousedown="candownting(event);" onmouseup="canupting(event);"
+            onmousemove="canmoveting(event);" ondblclick="candblting(event);"></canvas>
+
+<script type="text/javascript">
+  can=document.getElementById("cancan");
+  can.width=SCRWIDTH;
+  can.height=SCRHEIGHT;
+  ctx=can.getContext("2d");
+  workspace={name:"Empty workspace",algorithms:{},resources:{}}
+  SELECTED=false;
+  SELTYPE=false;
+  MOUSEDOWN=false;
+  var icw=50;
+  var ich=40;
+  function ctf(x){
+    //coordinate transformation function
+    return x;
+  }
+  function candownting(e){
+    MOUSEDOWN=true;
+    var ex=e.clientX;
+    var ey=e.clientY-TOPHEIGHT;
+    //determine if we're clicking anything
+    for(var gg in workspace.algorithms){
+      var alg=workspace.algorithms[gg];
+      if(alg.xcoord<ex&&(alg.xcoord+icw)>ex&&alg.ycoord<ey&&(alg.ycoord+ich)>ey){
+        SELECTED=alg.name;
+        SELTYPE="algorithm";
+        updateCan();
+        return;
+      }
+    }
+    for(var gg in workspace.resources){
+      var alg=workspace.resources[gg];
+      if(alg.xcoord<ex&&(alg.xcoord+icw)>ex&&alg.ycoord<ey&&(alg.ycoord+ich)>ey){
+        SELECTED=alg.name;
+        SELTYPE="resource";
+        updateCan();
+        return;
+      }
+    }
+    SELECTED=false;
+    SELTYPE=false;
+    updateCan();
+  }
+  function canmoveting(e){
+    if(!MOUSEDOWN){
+      return;
+    }
+    var ex=e.clientX;
+    var ey=e.clientY-TOPHEIGHT;
+    if(!SELECTED){
+      return;
+    }else{
+      if(SELTYPE=="algorithm"){
+        workspace.algorithms[SELECTED].xcoord=ctf(ex);
+        workspace.algorithms[SELECTED].ycoord=ctf(ey);
+      }else if (SELTYPE=="resource"){
+        workspace.resources[SELECTED].xcoord=ctf(ex);
+        workspace.resources[SELECTED].ycoord=ctf(ey);
+      }
+      updateCan();
+    }
+  }
+  function canupting(e){
+    MOUSEDOWN=false;
+  }
+  function updateCan(){
+    ctx.clearRect(0,0,SCRWIDTH,SCRHEIGHT);
+    for(var gg in workspace.resources){
+      var res=workspace.resources[gg];
+      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      ctx.fillStyle="white";
+      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillStyle="black";
+    }
+    for(var gg in workspace.algorithms){
+      var res=workspace.algorithms[gg];
+      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      ctx.fillStyle="white";
+      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillStyle="black";
+    }
+    if(SELTYPE=="algorithm"){
+      res=workspace.algorithms[SELECTED];
+      ctx.fillStyle="rgb(200,160,50)";
+      ctx.fillRect(res.xcoord-5,res.ycoord-5,icw+10,ich+10);
+      ctx.fillStyle="black";
+      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      ctx.fillStyle="white";
+      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillStyle="black";
+    } else if (SELTYPE=="resource"){
+      res=workspace.resources[SELECTED];
+      ctx.fillStyle="rgb(200,160,50)";
+      ctx.fillRect(res.xcoord-5,res.ycoord-5,icw+10,ich+10);
+      ctx.fillStyle="black";
+      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      ctx.fillStyle="white";
+      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillStyle="black";
+    }
+    ctx.fillStyle="rgb(240,240,240)";
+    ctx.fillText(workspace.name, SCRWIDTH/2-50, 50);
+    ctx.fillStyle="black";
+  }
+  function candblting(e){
+    MOUSEDOWN=false;
+    var ex=e.clientX;
+    var ey=e.clientY-TOPHEIGHT;
+    //determine if we're clicking anything
+    for(var gg in workspace.algorithms){
+      alg=workspace.algorithms[gg];
+      if(alg.xcoord<ex&&(alg.xcoord+icw)>ex&&alg.ycoord<ey&&(alg.ycoord+ich)>ey){
+        SELECTED=alg.name;
+        SELTYPE="algorithm";
+        openAlg(alg.name);
+        updateCan();
+        return;
+      }
+    }
+  }
+  updateCan();
+
+  function makenode(type,name){
+    if(type=='algorithm'){
+      //try getting algorithm 'name'
+      $.ajax({method:"GET",
+                        url:"/get_algs",
+                        data:{algorithms:[name]},
+                        success: function(ret){
+                          if(Object.keys(ret.algorithms).length>0){
+                            //console.log(ret.algorithms);
+                            ALGORITHMS[name]=ret.algorithms[0];
+                          }
+                        }});
+      ALGORITHMS[name]={name:name,code:"",author:"Christoph Sachse",public:false,
+                            publicdescr:null,icon:null};
+      workspace.algorithms[name]={name: name,xcoord:300,ycoord:50,output:[]};
+    } else if (type=='resource'){
+      workspace.resources[name]={name: name,xcoord:300,ycoord:50,output:[]};
+    } else if (type=='solution'){
+      if (name==null){
+        workspace={name:"Empty workspace",algorithms:{},resources:{}};
+      }
+      workspace=$.ajax({method:"GET",
+                        url:"/get_solution",
+                        data:{solname:name},
+                        success: function(ret){
+                          workspace=ret.solution;
+                          ALGORITHMS=ret.algorithms;
+                          updateCan();
+                        }});
+    }
+    updateCan();
+  }
+</script>
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Canvas workspace here-->
+
+</body>
+</html>
