@@ -56,8 +56,8 @@ app.get("/get_algs",function (req, res) {
 app.get("/get_names",function(req,res){
   res.json({algorithms:Object.keys(finstor.findalgs()),
             solutions:Object.keys(finstor.findsolns()),
-            resources: Object.keys({quandl:{name:"quandl"},yfinance:{name:"yfinance"},
-            robinhood:{name:"robinhood"},"robinhood buy":{name:"robinhood buy"}})
+            resources: Object.keys({'quandl BTC':{name:"quandl BTC"}/*,yfinance:{name:"yfinance"},
+            robinhood:{name:"robinhood"},"robinhood buy":{name:"robinhood buy"}*/})
   });
 });
 app.get("/get_algorithms",function(req,res){
@@ -86,6 +86,31 @@ app.post("/save__", function (req, res){
   res.json({finished:true});
 });
 
+//------------------------------------------------------------------------------------SIMULATION THINGY
+app.get("/simulate__",function(req,res){
+  var qqqq=require("quandl");
+  var quandl=new qqqq({auth_token: "7z3JG5zoHTxwyNECw2Cf"});
+  quandl.dataset({ source: "BITCOIN", table: "MTGOXUSD" }, function(err, response){
+    if(err){
+        throw err;
+    }else{
+      res.json(response);
+      /*var val=100;
+      var quant=0;
+      console.log(Object.keys(eval(response)));
+      var price=eval(response).data;
+      console.log(price);
+      var buyfunc=eval(finstor.findalgs()[req.query.simalg]);
+      for(var l=price.length-100;l<price.length;i++){
+        var vqp=buyfunc(price.slice(0,l),val,quant);
+        val-=price[l][1]*vqp;
+        quant+=vqp;
+      }
+      val+=price[l][0]*quant;
+      res.json({returns:(val-100)});*/
+    }
+  });
+});
 
 
 

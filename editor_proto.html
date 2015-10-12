@@ -46,6 +46,34 @@
         }
       }
     }
+    function simm(which){
+      $.ajax({method:"GET",
+              url:"/simulate__",
+              data:{simalg:which},
+              success:function(ret){
+
+
+
+                      var val=100;
+                      var quant=0;
+                      //console.log(JSON.parse(ret));
+                      price=JSON.parse(ret).dataset.data;
+                      var buyfunc=eval(ALGORITHMS[SELECTED].code);
+                      for(var l=price.length-101;l<price.length-1;l++){
+                        var vqp=buyfunc(price.slice(0,l),val,quant);
+                        console.log(vqp);
+                        val-=price[l][1]*vqp;
+                        quant+=vqp;
+                      }
+                      val+=price[l][1]*quant;
+                      returns=(val-100);
+
+
+                      alert("100 day returns were: "+returns+"%");
+                      //AAAA=ret;
+                      }
+              });
+    }
   </script>
   <link rel="stylesheet" type="text/CSS" href="/resources/apcs.css"/>
 
@@ -62,7 +90,7 @@
   </div>
   <div class="headopts" onclick="saveCurr();">Save
   </div>
-  <div class="headopts" onclick="resourceExpand();">Simulate
+  <div class="headopts" onclick="simm(SELECTED);">Simulate
   </div>
   <div class="headopts" onclick="resourceExpand();">Run
   </div>
@@ -102,7 +130,7 @@
       }
       sec=document.getElementById("menualgs");
       sec.innerHTML="<b><a href='javascript:makenode("+
-        '"algorithm",(Object.keys(workspace.algorithms).length+1)+".jl"'+");'>ALGORITHMS</a></b>";
+        '"algorithm",(Object.keys(workspace.algorithms).length+1)+".js"'+");'>ALGORITHMS</a></b>";
       for (var i=0;i<ret.algorithms.length;i++){
         var alg=ret.algorithms[i];
         sec.innerHTML+="<a href='javascript:makenode("+'"algorithm","'
@@ -181,7 +209,7 @@
   SELECTED=false;
   SELTYPE=false;
   MOUSEDOWN=false;
-  var icw=50;
+  var icw=80;
   var ich=40;
   function ctf(x){
     //coordinate transformation function
@@ -240,35 +268,41 @@
     ctx.clearRect(0,0,SCRWIDTH,SCRHEIGHT);
     for(var gg in workspace.resources){
       var res=workspace.resources[gg];
-      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      res.xcoord=eval(res.xcoord);
+      res.ycoord=eval(res.ycoord);
+      ctx.fillRect(eval(res.xcoord),eval(res.ycoord),icw,ich);
       ctx.fillStyle="white";
-      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillText(res.name,eval(res.xcoord)+15,eval(res.ycoord)+20);
       ctx.fillStyle="black";
     }
     for(var gg in workspace.algorithms){
       var res=workspace.algorithms[gg];
-      ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
+      res.xcoord=eval(res.xcoord);
+      res.ycoord=eval(res.ycoord);
+      ctx.fillRect(eval(res.xcoord),eval(res.ycoord),icw,ich);
       ctx.fillStyle="white";
-      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillText(res.name,eval(res.xcoord)+15,eval(res.ycoord)+20);
       ctx.fillStyle="black";
     }
     if(SELTYPE=="algorithm"){
       res=workspace.algorithms[SELECTED];
+      res.xcoord=eval(res.xcoord);
+      res.ycoord=eval(res.ycoord);
       ctx.fillStyle="rgb(200,160,50)";
       ctx.fillRect(res.xcoord-5,res.ycoord-5,icw+10,ich+10);
       ctx.fillStyle="black";
       ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
       ctx.fillStyle="white";
-      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillText(res.name,eval(res.xcoord)+15,eval(res.ycoord)+20);
       ctx.fillStyle="black";
     } else if (SELTYPE=="resource"){
       res=workspace.resources[SELECTED];
       ctx.fillStyle="rgb(200,160,50)";
-      ctx.fillRect(res.xcoord-5,res.ycoord-5,icw+10,ich+10);
+      ctx.fillRect(eval(res.xcoord)-5,eval(res.ycoord)-5,icw+10,ich+10);
       ctx.fillStyle="black";
       ctx.fillRect(res.xcoord,res.ycoord,icw,ich);
       ctx.fillStyle="white";
-      ctx.fillText(res.name,res.xcoord+15,res.ycoord+20);
+      ctx.fillText(res.name,eval(res.xcoord)+15,eval(res.ycoord)+20);
       ctx.fillStyle="black";
     }
     ctx.fillStyle="rgb(240,240,240)";
